@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "serve": "./node_modules/.bin/serve"
   },
   "repository": {
     "type": "git",
@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/josemlira/t3-webassembly/issues"
   },
-  "homepage": "https://github.com/josemlira/t3-webassembly#readme"
+  "homepage": "https://github.com/josemlira/t3-webassembly#readme",
+  "dependencies": {
+    "serve": "^11.3.0"
+  }
 }

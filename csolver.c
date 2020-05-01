@@ -1,6 +1,4 @@
-#include <stdio.h>
-
-int main(int argc, char *argv[]) {
+int solver() {
 
   int length = 3; // k: cantidad de elementos en cada set
   int obj = 10;   // b: valor que debe tener la suma
@@ -16,6 +14,7 @@ int main(int argc, char *argv[]) {
     y_bool[index] = 0;
     z_bool[index] = 0;
   }
+  int total = 0;
 
   for (int i = 0; i < length; i++) {
     for (int j = 0; j < length; j++) {
@@ -26,11 +25,12 @@ int main(int argc, char *argv[]) {
           x_bool[i]++;
           y_bool[j]++;
           z_bool[k]++;
-          printf("%i,%i,%i\n", x[i], y[j], z[k]);
+          total += result;
+          // printf("%i,%i,%i\n", x[i], y[j], z[k]);
         }
       }
     }
   }
 
-  return 0;
+  return total;
 }
