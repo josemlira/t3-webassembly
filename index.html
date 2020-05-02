@@ -1,71 +1,73 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>WASM test</title>
-    <script>
-      // WASM Support
-      if (!('WebAssembly' in window)) {
-        alert('You need a browser with wasm support enabled');
+
+<head>
+  <meta charset="utf-8">
+  <title>WASM test</title>
+  <script async type="text/javascript" src="csolver.js"></script>
+  <script>
+
+    function _moveArrayToHeap(array) {
+      const uiArray = new Uint8Array(array);
+      const space = Module._malloc(uiArray.length * uiArray.BYTES_PER_ELEMENT); // Similar a C malloc
+      Module.HEAPU8.set(uiArray, space); // Es HEAP8 porque es Uint8Array (dado el tipo del problema, es suficiente Uint8Array - no necesitamos mas de 8 bits)
+      return space;
+    }
+
+    function _allocateValue(size) {
+      return Module._malloc(1 * size);
+    }
+
+    function _readFromHeap(pointer, size) {
+      return Module.HEAPU8.subarray(pointer, pointer + size);
+    }
+
+    function CSolve(arrayX, arrayY, arrayZ, obj, length) {
+      let arrayOnHeapX;
+      let arrayOnHeapY;
+      let arrayOnHeapZ;
+      let outputLengthPtr = _allocateValue(1); // Char size
+      let outputLength;
+      let resultWASM;
+      let result = [];
+      try {
+        arrayOnHeapX = _moveArrayToHeap(arrayX);
+        arrayOnHeapY = _moveArrayToHeap(arrayY);
+        arrayOnHeapZ = _moveArrayToHeap(arrayZ);
+        resultWASM = Module.ccall(
+          'solver',
+          'number',
+          ['number', 'number', 'number', 'number', 'number', 'number'],
+          [arrayOnHeapX, arrayOnHeapY, arrayOnHeapZ, obj, length, outputLengthPtr],
+        );
+        outputLength = _readFromHeap(outputLengthPtr, 1)[0];
+        for (let i = 0; i < outputLength; i++) {
+          result.push(_readFromHeap(resultWASM + (3*i), 3));
+        }
+        console.log(result);
+      } catch(e) {
+        console.error(e);
+      } finally {
+        Module._free(arrayOnHeapX);
+        Module._free(arrayOnHeapY);
+        Module._free(arrayOnHeapZ);
+        Module._free(outputLengthPtr);
+        Module._free(resultWASM);
       }
+    }
 
-      async function loadWebAssembly(filename) {
-        return fetch(filename)
-          .then(response => response.arrayBuffer())
-          // .then(buffer => WebAssembly.compile(buffer))
-          // Return instance
-          .then(module => WebAssembly.instantiate(module, {
-            env: {
-              memory: new WebAssembly.Memory({ initial: 256, maximum: 256 }),
-              memoryBase: 0,
-              table: new WebAssembly.Table({ initial: 0, element: 'anyfunc' }), // It is necessary only when we want to call JS methods from Web Assembly code, in other cases it can be zero/empty
-              tableBase: 0,
-            },
-          }));
-      }
+    var Module = {
+      onRuntimeInitialized: function () {
+        CSolve([1, 2, 3, 4], [1, 2, 3, 4], [1, 1, 1, 1], 6, 4);
+      },
+    };
 
-      // Let's use the module
-      loadWebAssembly('csolver/csolver.wasm')
-        .then(({ exports }) => {
-          console.log(exports._solver);
-        });
+  </script>
 
-      // This function allows to load the code. It's the WebAssembly loader
-      // async function createWebAssembly(path, importObject) {
-      //   const result = await window.fetch(path);
-      //   const bytes = await result.arrayBuffer();
-      //   return WebAssembly.instantiate(bytes, importObject);
-      // }
+</head>
 
-      // const memory = new WebAssembly.Memory({initial: 256, maximum: 256});
-      // let exports = null;
+<body>
+  <p id="result"></p>
+</body>
 
-      // In this function we'll create the environment in which WebAssembly runs
-      // async function init() {
-      //
-      //   // All that WebAssembly needs to run
-      //   const importObject = {
-      //     module: {},
-      //     env: {
-      //       abortStackOverflow: _ => { throw new Error('Stack Overflow'); },
-      //       table: new WebAssembly.Table({initial: 0, maximum: 0, element: 'anyfunc'}),
-      //       tableBase: 0,
-      //       memory: memory,
-      //       memoryBase: 1024,
-      //       STACKTOP: 0,
-      //       STACK_MAX: memory.buffer.byteLength,
-      //     },
-      //   };
-      //
-      //   const wa = await createWebAssembly('csolver/csolver.wasm', importObject);
-      //   exports = wa.instance.exports;
-      //   console.info('got exports', exports);
-      //   console.log(exports._solver());
-      // }
-
-      // init();
-    </script>
-  </head>
-  <body>
-  </body>
 </html>
