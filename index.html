@@ -4,17 +4,65 @@
 <head>
   <meta charset="utf-8">
   <title>WASM test</title>
+  <script async type="text/javascript" src="csolver.js"></script>
   <script>
+
+    function _moveArrayToHeap(array) {
+      const uiArray = new Uint8Array(array);
+      const space = Module._malloc(uiArray.length * uiArray.BYTES_PER_ELEMENT); // Similar a C malloc
+      Module.HEAPU8.set(uiArray, space); // Es HEAP8 porque es Uint8Array (dado el tipo del problema, es suficiente Uint8Array - no necesitamos mas de 8 bits)
+      return space;
+    }
+
+    function _allocateValue(size) {
+      return Module._malloc(1 * size);
+    }
+
+    function _readFromHeap(pointer, size) {
+      return Module.HEAPU8.subarray(pointer, pointer + size);
+    }
+
+    function CSolve(arrayX, arrayY, arrayZ) {
+      let arrayOnHeapX;
+      let arrayOnHeapY;
+      let arrayOnHeapZ;
+      let outputLengthPtr = _allocateValue(1); // Char size
+      let outputLength;
+      let resultWASM;
+      let result = [];
+      try {
+        arrayOnHeapX = _moveArrayToHeap(arrayX);
+        arrayOnHeapY = _moveArrayToHeap(arrayY);
+        arrayOnHeapZ = _moveArrayToHeap(arrayZ);
+        resultWASM = Module.ccall(
+          'solver',
+          'number',
+          ['number', 'number', 'number', 'number', 'number'],
+          [arrayOnHeapX, arrayOnHeapY, arrayOnHeapZ, 3, outputLengthPtr],
+        );
+        outputLength = _readFromHeap(outputLengthPtr, 1)[0];
+        for (let i = 0; i < outputLength; i++) {
+          result.push(_readFromHeap(resultWASM + (3*i), 3));
+        }
+        console.log(result);
+      } catch(e) {
+        console.error(e);
+      } finally {
+        Module._free(arrayOnHeapX);
+        Module._free(arrayOnHeapY);
+        Module._free(arrayOnHeapZ);
+        Module._free(outputLengthPtr);
+        Module._free(resultWASM);
+      }
+    }
 
     var Module = {
       onRuntimeInitialized: function () {
-        my_add = Module.cwrap('solver', 'number')
-        console.log(my_add())
+        CSolve([3, 4, 4], [1, 4, 6], [1, 2, 5]);
       },
     };
 
   </script>
-  <script async type="text/javascript" src="csolver/csolver.js"></script>
 
 </head>
 
