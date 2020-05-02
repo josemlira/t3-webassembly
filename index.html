@@ -22,7 +22,7 @@
       return Module.HEAPU8.subarray(pointer, pointer + size);
     }
 
-    function CSolve(arrayX, arrayY, arrayZ) {
+    function CSolve(arrayX, arrayY, arrayZ, obj, length) {
       let arrayOnHeapX;
       let arrayOnHeapY;
       let arrayOnHeapZ;
@@ -37,8 +37,8 @@
         resultWASM = Module.ccall(
           'solver',
           'number',
-          ['number', 'number', 'number', 'number', 'number'],
-          [arrayOnHeapX, arrayOnHeapY, arrayOnHeapZ, 3, outputLengthPtr],
+          ['number', 'number', 'number', 'number', 'number', 'number'],
+          [arrayOnHeapX, arrayOnHeapY, arrayOnHeapZ, obj, length, outputLengthPtr],
         );
         outputLength = _readFromHeap(outputLengthPtr, 1)[0];
         for (let i = 0; i < outputLength; i++) {
@@ -58,7 +58,7 @@
 
     var Module = {
       onRuntimeInitialized: function () {
-        CSolve([3, 4, 4], [1, 4, 6], [1, 2, 5]);
+        CSolve([1, 2, 3, 4], [1, 2, 3, 4], [1, 1, 1, 1], 6, 4);
       },
     };
 
@@ -67,6 +67,7 @@
 </head>
 
 <body>
+  <p id="result"></p>
 </body>
 
 </html>

@@ -1,9 +1,8 @@
 #include <stdlib.h>
 
-char* solver(char* X, char* Y, char* Z, int length, char* s_length) {
+char* solver(char* X, char* Y, char* Z, int obj, int length, char* s_length) {
 
-  int MAX_SIZE = 255;
-  int obj = 10; // b: valor que debe tener la suma
+  int MAX_SIZE = length * 3; // 255
   int x_bool[length];
   int y_bool[length];
   int z_bool[length];
