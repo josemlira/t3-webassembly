@@ -4,8 +4,13 @@
 <head>
   <meta charset="utf-8">
   <title>WASM test</title>
+  <script  type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script async type="text/javascript" src="csolver.js"></script>
+  <script async type="text/javascript" src="jssolver.js"></script>
+  <script async type="text/javascript" src="tests.js"></script>
+
   <script>
+    let comparasion_info = [['size', 'C time', 'js time']]
 
     function _moveArrayToHeap(array) {
       const uiArray = new Uint8Array(array);
@@ -44,7 +49,7 @@
         for (let i = 0; i < outputLength; i++) {
           result.push(_readFromHeap(resultWASM + (3*i), 3));
         }
-        console.log(result);
+        //console.log(result);
       } catch(e) {
         console.error(e);
       } finally {
@@ -53,21 +58,54 @@
         Module._free(arrayOnHeapZ);
         Module._free(outputLengthPtr);
         Module._free(resultWASM);
+        return result
       }
     }
 
     var Module = {
       onRuntimeInitialized: function () {
-        CSolve([1, 2, 3, 4], [1, 2, 3, 4], [1, 1, 1, 1], 6, 4);
+        for(let size = 2; size < 300; size+=15){
+          const {x,y,z,b} = maketest(size);
+          const startC = new Date();
+          let resultC = CSolve(x, y, z, b, size);
+          const endC = new Date()
+          //console.log(endC - startC)
+          const startJs = new Date();
+          let resultJs = jssolver(b, x, y, z);
+          const endJs = new Date() 
+          //console.log(endJs - startJs);
+          comparasion_info.push([size, endC-startC, endJs-startJs])
+        }
       },
     };
+    console.log(comparasion_info)
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable(
+        comparasion_info
+      );
+
+      var options = {
+        title: 'Wasm Performance',
+        curveType: 'function',
+        legend: { position: 'bottom' }
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+      chart.draw(data, options);
+    }
+
 
   </script>
+
 
 </head>
 
 <body>
-  <p id="result"></p>
+  <div id="curve_chart" style="width: 900px; height: 500px"></div>
 </body>
 
 </html>

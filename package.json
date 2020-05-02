@@ -17,6 +17,9 @@
   },
   "homepage": "https://github.com/josemlira/t3-webassembly#readme",
   "dependencies": {
+    "chart": "^0.1.2",
+    "chart.js": "^2.9.3",
+    "lodash": "^4.17.15",
     "serve": "^11.3.0"
   }
 }
