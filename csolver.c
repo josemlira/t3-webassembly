@@ -1,13 +1,13 @@
 #include <stdlib.h>
 
-char* solver(char* X, char* Y, char* Z, int obj, int length, char* s_length) {
+unsigned char* solver(unsigned char* X, unsigned char* Y, unsigned char* Z, int obj, int length, int* s_length) {
 
-  int MAX_SIZE = length * 3; // 255
+  int MAX_SIZE = length * 3;
   int x_bool[length];
   int y_bool[length];
   int z_bool[length];
-  char count = 0;
-  char* output = malloc(MAX_SIZE * sizeof(char));
+  int count = 0;
+  unsigned char* output = malloc(MAX_SIZE * sizeof(char));
 
   for (int index = 0; index < length; index++) {
     x_bool[index] = 0;

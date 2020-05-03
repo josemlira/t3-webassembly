@@ -31,7 +31,7 @@
       let arrayOnHeapX;
       let arrayOnHeapY;
       let arrayOnHeapZ;
-      let outputLengthPtr = _allocateValue(1); // Char size
+      let outputLengthPtr = _allocateValue(2); // Char size
       let outputLength;
       let resultWASM;
       let result = [];
@@ -64,15 +64,17 @@
 
     var Module = {
       onRuntimeInitialized: function () {
-        const n = 300;
-        for(let size = 2; size < n; size+=15){
+        const n = 250;
+        for(let size = 1; size < n; size+=15){
           const {x,y,z,b} = maketest(size);
           const startC = new Date();
           let resultC = CSolve(x, y, z, b, size);
           const endC = new Date()
+          console.log("resultC");
+          console.log(resultC);
           const startJs = new Date();
           let resultJs = jssolver(b, x, y, z);
-          const endJs = new Date() 
+          const endJs = new Date()
           comparasion_info.push([size, endC-startC, endJs-startJs])
         }
       },
