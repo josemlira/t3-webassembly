@@ -34,9 +34,9 @@ char* solver(char* X, char* Y, char* Z, int obj, int length, char* s_length) {
   }
 
   *s_length = count;
-  if (count !== length){
+  if (count != length){
       *s_length = 0;
   }
   return output;
-  
+
 }
