@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title>WASM test</title>
-  <script  type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script async type="text/javascript" src="csolver.js"></script>
   <script async type="text/javascript" src="jssolver.js"></script>
   <script async type="text/javascript" src="tests.js"></script>
@@ -64,16 +64,15 @@
 
     var Module = {
       onRuntimeInitialized: function () {
-        for(let size = 2; size < 300; size+=15){
+        const n = 300;
+        for(let size = 2; size < n; size+=15){
           const {x,y,z,b} = maketest(size);
           const startC = new Date();
           let resultC = CSolve(x, y, z, b, size);
           const endC = new Date()
-          //console.log(endC - startC)
           const startJs = new Date();
           let resultJs = jssolver(b, x, y, z);
           const endJs = new Date() 
-          //console.log(endJs - startJs);
           comparasion_info.push([size, endC-startC, endJs-startJs])
         }
       },
