@@ -5,7 +5,6 @@
   <meta charset="utf-8">
   <title>WASM test</title>
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-  <script async type="text/javascript" src="csolver.js"></script>
   <script async type="text/javascript" src="jssolver.js"></script>
   <script async type="text/javascript" src="tests.js"></script>
 
@@ -15,7 +14,7 @@
     function _moveArrayToHeap(array) {
       const uiArray = new Uint8Array(array);
       const space = Module._malloc(uiArray.length * uiArray.BYTES_PER_ELEMENT); // Similar a C malloc
-      Module.HEAPU8.set(uiArray, space); // Es HEAP8 porque es Uint8Array (dado el tipo del problema, es suficiente Uint8Array - no necesitamos mas de 8 bits)
+      Module.HEAPU8.set(uiArray, space);
       return space;
     }
 
@@ -24,14 +23,14 @@
     }
 
     function _readFromHeap(pointer, size) {
-      return Module.HEAPU8.subarray(pointer, pointer + size);
+      return Array.from(new Uint8Array(Module.HEAPU8.subarray(pointer, pointer + size)));
     }
 
     function CSolve(arrayX, arrayY, arrayZ, obj, length) {
       let arrayOnHeapX;
       let arrayOnHeapY;
       let arrayOnHeapZ;
-      let outputLengthPtr = _allocateValue(2); // Char size
+      let outputLengthPtr = _allocateValue(1); // Char size
       let outputLength;
       let resultWASM;
       let result = [];
@@ -58,7 +57,7 @@
         Module._free(arrayOnHeapZ);
         Module._free(outputLengthPtr);
         Module._free(resultWASM);
-        return result
+        return result;
       }
     }
 
@@ -66,23 +65,23 @@
       onRuntimeInitialized: function () {
         const n = 221;
         for(let size = 1; size < n; size+=1){
-          console.log(size)
+          console.log(size);
           const {x,y,z,b} = maketest(size);
           const startC = new Date();
           let resultC = CSolve(x, y, z, b, size);
-          const endC = new Date()
+          const endC = new Date();
           console.log("result C");
           console.log(resultC);
           const startJs = new Date();
           let resultJs = jssolver(b, x, y, z);
-          const endJs = new Date()
-          console.log("result JS:")
-          console.log(resultJs)
-          comparasion_info.push([size, endC-startC, endJs-startJs])
+          const endJs = new Date();
+          console.log("result JS:");
+          console.log(resultJs);
+          comparasion_info.push([size, endC-startC, endJs-startJs]);
         }
       },
     };
-    console.log(comparasion_info)
+    console.log(comparasion_info);
     google.charts.load('current', {'packages':['corechart']});
     google.charts.setOnLoadCallback(drawChart);
 
@@ -104,8 +103,7 @@
 
 
   </script>
-
-
+  <script async type="text/javascript" src="csolver.js"></script>
 </head>
 
 <body>

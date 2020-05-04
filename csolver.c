@@ -1,8 +1,9 @@
 #include <stdlib.h>
+#include <stdio.h>
 
-unsigned char* solver(unsigned char* X, unsigned char* Y, unsigned char* Z, int obj, int length, int* s_length) {
+unsigned char* solver(unsigned char* X, unsigned char* Y, unsigned char* Z, unsigned char obj, unsigned char length, unsigned char* s_length) {
 
-  int MAX_SIZE = length * 3;
+  int MAX_SIZE = ((int) length) * 3;
   int x_bool[length];
   int y_bool[length];
   int z_bool[length];
