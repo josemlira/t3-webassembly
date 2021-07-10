@@ -4,13 +4,17 @@
 <head>
   <meta charset="utf-8">
   <title>WASM test</title>
-  <script async type="text/javascript" src="csolver.js"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script async type="text/javascript" src="jssolver.js"></script>
+  <script async type="text/javascript" src="tests.js"></script>
+
   <script>
+    let comparasion_info = [['size', 'C time', 'js time']]
 
     function _moveArrayToHeap(array) {
       const uiArray = new Uint8Array(array);
       const space = Module._malloc(uiArray.length * uiArray.BYTES_PER_ELEMENT); // Similar a C malloc
-      Module.HEAPU8.set(uiArray, space); // Es HEAP8 porque es Uint8Array (dado el tipo del problema, es suficiente Uint8Array - no necesitamos mas de 8 bits)
+      Module.HEAPU8.set(uiArray, space);
       return space;
     }
 
@@ -19,7 +23,7 @@
     }
 
     function _readFromHeap(pointer, size) {
-      return Module.HEAPU8.subarray(pointer, pointer + size);
+      return Array.from(new Uint8Array(Module.HEAPU8.subarray(pointer, pointer + size)));
     }
 
     function CSolve(arrayX, arrayY, arrayZ, obj, length) {
@@ -44,7 +48,7 @@
         for (let i = 0; i < outputLength; i++) {
           result.push(_readFromHeap(resultWASM + (3*i), 3));
         }
-        console.log(result);
+        //console.log(result);
       } catch(e) {
         console.error(e);
       } finally {
@@ -53,21 +57,57 @@
         Module._free(arrayOnHeapZ);
         Module._free(outputLengthPtr);
         Module._free(resultWASM);
+        return result;
       }
     }
 
     var Module = {
       onRuntimeInitialized: function () {
-        CSolve([1, 2, 3, 4], [1, 2, 3, 4], [1, 1, 1, 1], 6, 4);
+        const n = 221;
+        for(let size = 1; size < n; size+=1){
+          console.log(size);
+          const {x,y,z,b} = maketest(size);
+          const startC = new Date();
+          let resultC = CSolve(x, y, z, b, size);
+          const endC = new Date();
+          console.log("result C");
+          console.log(resultC);
+          const startJs = new Date();
+          let resultJs = jssolver(b, x, y, z);
+          const endJs = new Date();
+          console.log("result JS:");
+          console.log(resultJs);
+          comparasion_info.push([size, endC-startC, endJs-startJs]);
+        }
       },
     };
+    console.log(comparasion_info);
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable(
+        comparasion_info
+      );
+
+      var options = {
+        title: 'Wasm Performance',
+        curveType: 'function',
+        legend: { position: 'bottom' }
+      };
+
+      var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+      chart.draw(data, options);
+    }
+
 
   </script>
-
+  <script async type="text/javascript" src="csolver.js"></script>
 </head>
 
 <body>
-  <p id="result"></p>
+  <div id="curve_chart" style="width: 900px; height: 500px"></div>
 </body>
 
 </html>
